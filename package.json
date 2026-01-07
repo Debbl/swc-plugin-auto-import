@@ -1,0 +1,32 @@
+{
+  "name": "swc-plugin-auto-import",
+  "version": "0.1.0",
+  "description": "SWC plugin for auto importing APIs on-demand, inspired by unplugin-auto-import",
+  "author": "",
+  "license": "ISC",
+  "keywords": [
+    "swc-plugin",
+    "auto-import",
+    "vue",
+    "react",
+    "swc",
+    "transform"
+  ],
+  "main": "target/wasm32-wasip1/release/swc_plugin_auto_import.wasm",
+  "scripts": {
+    "build": "cargo build-wasip1 --release",
+    "test": "cargo test",
+    "prepublishOnly": "cargo build-wasip1 --release"
+  },
+  "files": [
+    "target/wasm32-wasip1/release/swc_plugin_auto_import.wasm"
+  ],
+  "preferUnplugged": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/swc-plugin-auto-import"
+  },
+  "devDependencies": {
+    "@swc/core": "^1.15.8"
+  }
+}
