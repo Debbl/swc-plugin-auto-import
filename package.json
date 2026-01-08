@@ -26,6 +26,7 @@
     "build": "cargo build-wasip1 --release",
     "test": "cargo test",
     "release": "pnpm build && bumpp && pnpm publish",
+    "typecheck": "echo 'No typechecking for wasm plugins'",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "prepublishOnly": "cargo build-wasip1 --release"
