@@ -58,12 +58,12 @@ module.exports = {
         {
           presets: ['react'],
           imports: {
-            'lodash-es': ['debounce', 'throttle']
-          }
-        }
-      ]
-    ]
-  }
+            'lodash-es': ['debounce', 'throttle'],
+          },
+        },
+      ],
+    ],
+  },
 }
 ```
 
@@ -84,16 +84,16 @@ module.exports = {
                 [
                   'swc-plugin-auto-import',
                   {
-                    presets: ['react']
-                  }
-                ]
-              ]
-            }
-          }
-        }
-      }
-    ]
-  }
+                    presets: ['react'],
+                  },
+                ],
+              ],
+            },
+          },
+        },
+      },
+    ],
+  },
 }
 ```
 
@@ -102,6 +102,7 @@ module.exports = {
 ### Vue 3 Auto Import
 
 **Configuration:**
+
 ```json
 {
   "presets": ["vue"]
@@ -109,30 +110,33 @@ module.exports = {
 ```
 
 **Input:**
+
 ```js
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
+const count = ref(0)
+const doubled = computed(() => count.value * 2)
 
 onMounted(() => {
-  console.log('Component mounted');
-});
+  console.log('Component mounted')
+})
 ```
 
 **Output:**
-```js
-import { ref, computed, onMounted } from "vue";
 
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
+```js
+import { ref, computed, onMounted } from 'vue'
+
+const count = ref(0)
+const doubled = computed(() => count.value * 2)
 
 onMounted(() => {
-  console.log('Component mounted');
-});
+  console.log('Component mounted')
+})
 ```
 
 ### React Hooks Auto Import
 
 **Configuration:**
+
 ```json
 {
   "presets": ["react"]
@@ -140,28 +144,31 @@ onMounted(() => {
 ```
 
 **Input:**
+
 ```jsx
-const [count, setCount] = useState(0);
+const [count, setCount] = useState(0)
 
 useEffect(() => {
-  console.log(count);
-}, [count]);
+  console.log(count)
+}, [count])
 ```
 
 **Output:**
-```jsx
-import { useState, useEffect } from "react";
 
-const [count, setCount] = useState(0);
+```jsx
+import { useState, useEffect } from 'react'
+
+const [count, setCount] = useState(0)
 
 useEffect(() => {
-  console.log(count);
-}, [count]);
+  console.log(count)
+}, [count])
 ```
 
 ### Custom Library Import
 
 **Configuration:**
+
 ```json
 {
   "imports": {
@@ -173,23 +180,25 @@ useEffect(() => {
 ```
 
 **Input:**
-```js
-const { x, y } = useMouse();
-const debouncedFn = debounce(() => {}, 300);
 
-axios.get('/api/data');
+```js
+const { x, y } = useMouse()
+const debouncedFn = debounce(() => {}, 300)
+
+axios.get('/api/data')
 ```
 
 **Output:**
+
 ```js
-import { useMouse } from "@vueuse/core";
-import { debounce } from "lodash-es";
-import { default as axios } from "axios";
+import { useMouse } from '@vueuse/core'
+import { debounce } from 'lodash-es'
+import { default as axios } from 'axios'
 
-const { x, y } = useMouse();
-const debouncedFn = debounce(() => {}, 300);
+const { x, y } = useMouse()
+const debouncedFn = debounce(() => {}, 300)
 
-axios.get('/api/data');
+axios.get('/api/data')
 ```
 
 ## ⚙️ Configuration Options
@@ -200,6 +209,7 @@ axios.get('/api/data');
 **Default:** `[]`
 
 Preset configurations. Currently supported:
+
 - `"vue"` - Vue 3 Composition API
 - `"react"` - React Hooks
 - `"vue-router"` - Vue Router Composition API
@@ -213,17 +223,15 @@ Preset configurations. Currently supported:
 Custom import configuration.
 
 **Format:**
+
 ```json
 {
-  "package-name": [
-    "namedExport1",
-    "namedExport2",
-    ["exportName", "alias"]
-  ]
+  "package-name": ["namedExport1", "namedExport2", ["exportName", "alias"]]
 }
 ```
 
 **Example:**
+
 ```json
 {
   "@vueuse/core": ["useMouse", "useFetch"],
@@ -242,6 +250,7 @@ Enable debug mode (reserved field in current version).
 ## 📋 Built-in Presets
 
 ### Vue Preset
+
 ```
 ref, computed, reactive, watch, watchEffect, onMounted, onUnmounted,
 onBeforeMount, onBeforeUnmount, onUpdated, onBeforeUpdate, nextTick,
@@ -249,17 +258,20 @@ defineComponent, createApp, toRef, toRefs, unref, isRef
 ```
 
 ### React Preset
+
 ```
 useState, useEffect, useContext, useReducer, useCallback, useMemo,
 useRef, useLayoutEffect, useImperativeHandle
 ```
 
 ### Vue Router Preset
+
 ```
 useRouter, useRoute
 ```
 
 ### React Router Preset
+
 ```
 useNavigate, useLocation, useParams, useSearchParams
 ```
@@ -272,12 +284,12 @@ If an API is already imported, the plugin won't add it again:
 
 ```js
 // Input
-import { ref } from 'vue';
-const count = ref(0);
+import { ref } from 'vue'
+const count = ref(0)
 
 // Output - unchanged
-import { ref } from 'vue';
-const count = ref(0);
+import { ref } from 'vue'
+const count = ref(0)
 ```
 
 ### 2. No Import for Local Declarations
@@ -287,27 +299,27 @@ If an identifier is locally declared, the plugin won't add an import:
 ```js
 // Input
 function ref() {
-  return "local ref";
+  return 'local ref'
 }
-const data = ref();
+const data = ref()
 
 // Output - unchanged, no import added
 function ref() {
-  return "local ref";
+  return 'local ref'
 }
-const data = ref();
+const data = ref()
 ```
 
 ## 🔄 Comparison with unplugin-auto-import
 
-| Feature | unplugin-auto-import | swc-auto-import |
-|---------|---------------------|-----------------|
-| Runtime | Vite/Webpack/Rollup | SWC Compiler |
-| Performance | Fast | Very Fast |
-| .d.ts Generation | ✅ | Planned |
-| TypeScript Support | ✅ | ✅ |
-| Custom Resolvers | ✅ | Planned |
-| ESLint Integration | ✅ | Planned |
+| Feature            | unplugin-auto-import | swc-auto-import |
+| ------------------ | -------------------- | --------------- |
+| Runtime            | Vite/Webpack/Rollup  | SWC Compiler    |
+| Performance        | Fast                 | Very Fast       |
+| .d.ts Generation   | ✅                   | Planned         |
+| TypeScript Support | ✅                   | ✅              |
+| Custom Resolvers   | ✅                   | Planned         |
+| ESLint Integration | ✅                   | Planned         |
 
 ## 🛠️ Development
 
