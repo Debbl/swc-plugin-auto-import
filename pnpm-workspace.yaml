@@ -1,3 +1,10 @@
 packages:
-  - '.'
-  - 'playground'
+  - .
+  - playground
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+
+onlyBuiltDependencies:
+  - '@swc/core'

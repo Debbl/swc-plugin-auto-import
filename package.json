@@ -2,6 +2,7 @@
   "name": "swc-plugin-auto-import",
   "type": "module",
   "version": "0.0.0",
+  "packageManager": "pnpm@10.25.0",
   "description": "SWC plugin for auto importing APIs on-demand, inspired by unplugin-auto-import",
   "author": "Brendan Dash <me@aiwan.run> (https://aiwan.run)",
   "license": "MIT",
