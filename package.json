@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/swc-plugin-auto-import"
+    "url": "https://github.com/Debbl/swc-plugin-auto-import"
   },
   "keywords": [
     "swc-plugin",
