@@ -35,15 +35,54 @@ pub fn get_preset_imports(preset: &str) -> HashMap<String, Vec<(String, Option<S
             map.insert(
                 "react".to_string(),
                 vec![
+                    // Common React API
                     ("useState".to_string(), None),
-                    ("useEffect".to_string(), None),
-                    ("useContext".to_string(), None),
-                    ("useReducer".to_string(), None),
                     ("useCallback".to_string(), None),
                     ("useMemo".to_string(), None),
+                    ("useEffect".to_string(), None),
                     ("useRef".to_string(), None),
-                    ("useLayoutEffect".to_string(), None),
+                    ("useContext".to_string(), None),
+                    ("useReducer".to_string(), None),
                     ("useImperativeHandle".to_string(), None),
+                    ("useDebugValue".to_string(), None),
+                    ("useDeferredValue".to_string(), None),
+                    ("useLayoutEffect".to_string(), None),
+                    ("useTransition".to_string(), None),
+                    ("startTransition".to_string(), None),
+                    ("useSyncExternalStore".to_string(), None),
+                    ("useInsertionEffect".to_string(), None),
+                    ("useId".to_string(), None),
+                    ("lazy".to_string(), None),
+                    ("memo".to_string(), None),
+                    ("createRef".to_string(), None),
+                    ("forwardRef".to_string(), None),
+                    // Additional React API
+                    ("cache".to_string(), None),
+                    ("cacheSignal".to_string(), None),
+                    ("createContext".to_string(), None),
+                    ("use".to_string(), None),
+                    ("useOptimistic".to_string(), None),
+                    ("useEffectEvent".to_string(), None),
+                    ("useActionState".to_string(), None),
+                    ("Fragment".to_string(), None),
+                    ("Suspense".to_string(), None),
+                    ("Activity".to_string(), None),
+                ],
+            );
+        }
+        "react-dom" => {
+            map.insert(
+                "react-dom".to_string(),
+                vec![
+                    ("useFormStatus".to_string(), None),
+                    ("createPortal".to_string(), None),
+                    ("flushSync".to_string(), None),
+                    ("preconnect".to_string(), None),
+                    ("prefetchDNS".to_string(), None),
+                    ("preinit".to_string(), None),
+                    ("preinitModule".to_string(), None),
+                    ("preload".to_string(), None),
+                    ("preloadModule".to_string(), None),
                 ],
             );
         }
@@ -92,9 +131,21 @@ mod tests {
         let imports = get_preset_imports("react");
         assert!(imports.contains_key("react"));
         let react_imports = imports.get("react").unwrap();
-        assert!(react_imports.len() >= 9);
+        assert!(react_imports.len() >= 30);
         assert!(react_imports.contains(&("useState".to_string(), None)));
         assert!(react_imports.contains(&("useEffect".to_string(), None)));
+        assert!(react_imports.contains(&("lazy".to_string(), None)));
+        assert!(react_imports.contains(&("memo".to_string(), None)));
+    }
+
+    #[test]
+    fn test_react_dom_preset() {
+        let imports = get_preset_imports("react-dom");
+        assert!(imports.contains_key("react-dom"));
+        let react_dom_imports = imports.get("react-dom").unwrap();
+        assert_eq!(react_dom_imports.len(), 9);
+        assert!(react_dom_imports.contains(&("useFormStatus".to_string(), None)));
+        assert!(react_dom_imports.contains(&("createPortal".to_string(), None)));
     }
 
     #[test]
