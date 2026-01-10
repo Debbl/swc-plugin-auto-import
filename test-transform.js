@@ -17,7 +17,7 @@ swc
               'target/wasm32-wasip1/release/swc_plugin_auto_import.wasm',
             ),
             {
-              presets: ['react'],
+              imports: ['react'],
               debug: true,
             },
           ],

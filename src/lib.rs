@@ -10,7 +10,7 @@ mod config;
 mod presets;
 mod visitor;
 
-pub use config::{ImportItem, ImportSource, PluginConfig};
+pub use config::{ImportConfig, ImportItem, ImportSource, PluginConfig};
 pub use visitor::AutoImportVisitor;
 
 /// Convert Program AST to source code string for debugging
@@ -39,11 +39,17 @@ fn program_to_string(program: &Program) -> String {
 ///     "experimental": {
 ///       "plugins": [
 ///         ["swc-plugin-auto-import", {
-///           "presets": ["vue", "react"],
-///           "imports": {
-///             "@vueuse/core": ["useMouse", "useFetch"],
-///             "axios": [["default", "axios"]]
-///           }
+///           "imports": [
+///             "react",
+///             "react-dom",
+///             {
+///               "@vueuse/core": ["useMouse", "useFetch"]
+///             },
+///             {
+///               "from": "axios",
+///               "imports": [["default", "axios"]]
+///             }
+///           ]
 ///         }]
 ///       ]
 ///     }

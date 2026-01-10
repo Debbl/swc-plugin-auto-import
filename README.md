@@ -32,11 +32,17 @@ pnpm add swc-plugin-auto-import
         [
           "swc-plugin-auto-import",
           {
-            "presets": ["vue", "react"],
-            "imports": {
-              "@vueuse/core": ["useMouse", "useFetch"],
-              "axios": [["default", "axios"]]
-            },
+            "imports": [
+              "vue",
+              "react",
+              {
+                "@vueuse/core": ["useMouse", "useFetch"]
+              },
+              {
+                "from": "axios",
+                "imports": [["default", "axios"]]
+              }
+            ],
             "debug": false
           }
         ]
@@ -56,10 +62,12 @@ module.exports = {
       [
         'swc-plugin-auto-import',
         {
-          presets: ['react'],
-          imports: {
-            'lodash-es': ['debounce', 'throttle'],
-          },
+          imports: [
+            'react',
+            {
+              'lodash-es': ['debounce', 'throttle'],
+            },
+          ],
         },
       ],
     ],
@@ -84,7 +92,7 @@ module.exports = {
                 [
                   'swc-plugin-auto-import',
                   {
-                    presets: ['react'],
+                    imports: ['react'],
                   },
                 ],
               ],
@@ -105,7 +113,7 @@ module.exports = {
 
 ```json
 {
-  "presets": ["vue"]
+  "imports": ["vue"]
 }
 ```
 
@@ -139,7 +147,7 @@ onMounted(() => {
 
 ```json
 {
-  "presets": ["react"]
+  "imports": ["react"]
 }
 ```
 
@@ -171,11 +179,18 @@ useEffect(() => {
 
 ```json
 {
-  "imports": {
-    "@vueuse/core": ["useMouse", "useKeyboard"],
-    "lodash-es": ["debounce", "throttle"],
-    "axios": [["default", "axios"]]
-  }
+  "imports": [
+    {
+      "@vueuse/core": ["useMouse", "useKeyboard"]
+    },
+    {
+      "lodash-es": ["debounce", "throttle"]
+    },
+    {
+      "from": "axios",
+      "imports": [["default", "axios"]]
+    }
+  ]
 }
 ```
 
@@ -203,30 +218,38 @@ axios.get('/api/data')
 
 ## ⚙️ Configuration Options
 
-### `presets`
-
-**Type:** `string[]`  
-**Default:** `[]`
-
-Preset configurations. Currently supported:
-
-- `"vue"` - Vue 3 Composition API
-- `"react"` - React Hooks
-- `"vue-router"` - Vue Router Composition API
-- `"react-router"` - React Router Hooks
-
 ### `imports`
 
-**Type:** `Record<string, string[] | [string, string][]>`  
-**Default:** `{}`
+**Type:** `Array<string | object>`  
+**Default:** `[]`
 
-Custom import configuration.
+Import configuration. Supports three formats:
 
-**Format:**
+#### 1. Preset String (Built-in presets)
 
 ```json
 {
-  "package-name": ["namedExport1", "namedExport2", ["exportName", "alias"]]
+  "imports": ["vue", "react", "vue-router", "react-router"]
+}
+```
+
+Currently supported presets:
+
+- `"vue"` - Vue 3 Composition API
+- `"react"` - React Hooks
+- `"react-dom"` - React DOM APIs
+- `"vue-router"` - Vue Router Composition API
+- `"react-router"` - React Router Hooks
+
+#### 2. Package Mapping Object
+
+```json
+{
+  "imports": [
+    {
+      "package-name": ["namedExport1", "namedExport2"]
+    }
+  ]
 }
 ```
 
@@ -234,9 +257,64 @@ Custom import configuration.
 
 ```json
 {
-  "@vueuse/core": ["useMouse", "useFetch"],
-  "axios": [["default", "axios"]],
-  "date-fns": ["format", "parseISO"]
+  "imports": [
+    {
+      "@vueuse/core": ["useMouse", "useFetch"]
+    },
+    {
+      "date-fns": ["format", "parseISO"]
+    }
+  ]
+}
+```
+
+#### 3. Explicit Import Object
+
+```json
+{
+  "imports": [
+    {
+      "from": "package-name",
+      "imports": ["export1", ["exportName", "alias"]]
+    }
+  ]
+}
+```
+
+**Example:**
+
+```json
+{
+  "imports": [
+    {
+      "from": "axios",
+      "imports": [["default", "axios"]]
+    },
+    {
+      "from": "motion/react-m",
+      "imports": [["*", "motion"]]
+    }
+  ]
+}
+```
+
+#### Mixed Format
+
+You can combine all three formats:
+
+```json
+{
+  "imports": [
+    "react",
+    "react-dom",
+    {
+      "@vueuse/core": ["useMouse", "useFetch"]
+    },
+    {
+      "from": "axios",
+      "imports": [["default", "axios"]]
+    }
+  ]
 }
 ```
 

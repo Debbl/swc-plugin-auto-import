@@ -18,16 +18,24 @@ pub enum ImportItem {
     Aliased([String; 2]),
 }
 
+/// Import configuration item - supports multiple formats
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum ImportConfig {
+    /// Simple string form: "react"
+    Simple(String),
+    /// Explicit form with from field: { from: "motion/react-m", imports: [['*', 'motion']] }
+    Explicit { from: String, imports: ImportSource },
+    /// Object mapping form: { "twl": ["cn"] }
+    Mapping(HashMap<String, ImportSource>),
+}
+
 /// Plugin configuration
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct PluginConfig {
-    /// Presets: ["vue", "react", "vue-router"]
+    /// Import configurations: can be strings, objects with 'from' field, or package mappings
     #[serde(default)]
-    pub presets: Vec<String>,
-
-    /// Custom import mappings: { "@vueuse/core": ["useMouse", "useFetch"] }
-    #[serde(default)]
-    pub imports: HashMap<String, ImportSource>,
+    pub imports: Vec<ImportConfig>,
 
     /// Enable debug logging
     #[serde(default)]

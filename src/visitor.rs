@@ -6,7 +6,7 @@ use swc_core::ecma::{
 };
 
 use crate::collector::IdentifierCollector;
-use crate::config::{ImportItem, ImportSource, PluginConfig};
+use crate::config::{ImportConfig, ImportItem, ImportSource, PluginConfig};
 use crate::presets::get_preset_imports;
 
 /// Main transform visitor
@@ -24,36 +24,66 @@ impl AutoImportVisitor {
         let debug = config.debug;
         let mut import_map = HashMap::new();
 
-        // Process presets
-        for preset in &config.presets {
-            let preset_imports = get_preset_imports(preset);
-            for (source, imports) in preset_imports {
-                import_map
-                    .entry(source)
-                    .or_insert_with(Vec::new)
-                    .extend(imports);
-            }
-        }
-
-        // Process custom imports
-        for (source, import_source) in &config.imports {
-            let imports: Vec<(String, Option<String>)> = match import_source {
-                ImportSource::Simple(names) => {
-                    names.iter().map(|name| (name.clone(), None)).collect()
+        // Process imports array
+        for import_config in &config.imports {
+            match import_config {
+                // Simple string form: "react" - treat as preset
+                ImportConfig::Simple(preset) => {
+                    let preset_imports = get_preset_imports(preset);
+                    for (source, imports) in preset_imports {
+                        import_map
+                            .entry(source)
+                            .or_insert_with(Vec::new)
+                            .extend(imports);
+                    }
                 }
-                ImportSource::WithAlias(items) => items
-                    .iter()
-                    .map(|item| match item {
-                        ImportItem::Simple(name) => (name.clone(), None),
-                        ImportItem::Aliased([from, alias]) => (from.clone(), Some(alias.clone())),
-                    })
-                    .collect(),
-            };
+                // Explicit form: { from: "...", imports: [...] }
+                ImportConfig::Explicit { from, imports } => {
+                    let import_list: Vec<(String, Option<String>)> = match imports {
+                        ImportSource::Simple(names) => {
+                            names.iter().map(|name| (name.clone(), None)).collect()
+                        }
+                        ImportSource::WithAlias(items) => items
+                            .iter()
+                            .map(|item| match item {
+                                ImportItem::Simple(name) => (name.clone(), None),
+                                ImportItem::Aliased([name, alias]) => {
+                                    (name.clone(), Some(alias.clone()))
+                                }
+                            })
+                            .collect(),
+                    };
 
-            import_map
-                .entry(source.clone())
-                .or_insert_with(Vec::new)
-                .extend(imports);
+                    import_map
+                        .entry(from.clone())
+                        .or_insert_with(Vec::new)
+                        .extend(import_list);
+                }
+                // Object mapping form: { "package": ["export1", "export2"] }
+                ImportConfig::Mapping(map) => {
+                    for (source, import_source) in map {
+                        let import_list: Vec<(String, Option<String>)> = match import_source {
+                            ImportSource::Simple(names) => {
+                                names.iter().map(|name| (name.clone(), None)).collect()
+                            }
+                            ImportSource::WithAlias(items) => items
+                                .iter()
+                                .map(|item| match item {
+                                    ImportItem::Simple(name) => (name.clone(), None),
+                                    ImportItem::Aliased([name, alias]) => {
+                                        (name.clone(), Some(alias.clone()))
+                                    }
+                                })
+                                .collect(),
+                        };
+
+                        import_map
+                            .entry(source.clone())
+                            .or_insert_with(Vec::new)
+                            .extend(import_list);
+                    }
+                }
+            }
         }
 
         Self {

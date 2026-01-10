@@ -1,7 +1,11 @@
 {
-  "imports": {
-    "@vueuse/core": ["useMouse", "useLocalStorage"],
-    "lodash-es": ["debounce"]
-  }
+  "imports": [
+    {
+      "@vueuse/core": ["useMouse", "useLocalStorage"]
+    },
+    {
+      "lodash-es": ["debounce"]
+    }
+  ]
 }
 

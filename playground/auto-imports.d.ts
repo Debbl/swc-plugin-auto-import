@@ -9,4 +9,6 @@ export {}
 declare global {
   const useEffect: typeof import('react').useEffect
   const useState: typeof import('react').useState
+  const cn: typeof import('twl').cn
+  const add: typeof import('@/utils').add
 }
