@@ -63,8 +63,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - name: Publish to npm
-        run: pnpm publish
+      - name: Publish to NPM
+        run: pnpm -r publish --access public --no-git-checks
 
       - name: Generate changelog
         run: npx changelogithub
