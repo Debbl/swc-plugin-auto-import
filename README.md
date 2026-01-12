@@ -243,12 +243,27 @@ axios.get('/api/data')
 
 ### `imports`
 
-**Type:** `Array<string | object>`  
-**Default:** `[]`
+**Type:** `Arrayable<ImportsMap | PresetName | InlinePreset>`  
+**Default:** `undefined`
 
-Import configuration. Supports three formats:
+Where:
+
+- `Arrayable<T> = T | Array<T>` - Can be a single value or an array
+- `ImportsMap` - Object mapping packages to their exports
+- `PresetName` - String like `"react"`, `"vue"`, etc.
+- `InlinePreset` - Object with `from` and `imports` fields
+
+Import configuration. Supports multiple formats:
 
 #### 1. Preset String (Built-in presets)
+
+```json
+{
+  "imports": "react"
+}
+```
+
+Or as an array:
 
 ```json
 {
@@ -264,22 +279,20 @@ Currently supported presets:
 - `"vue-router"` - Vue Router Composition API
 - `"react-router"` - React Router Hooks
 
-#### 2. Package Mapping Object
+#### 2. ImportsMap - Package Mapping Object
 
 A simplified syntax for defining imports. Each key is a package name, and the value is an array of imports.
 
 ```json
 {
-  "imports": [
-    {
-      "package-name": [
-        "namedExport",
-        ["exportName", "alias"],
-        ["default", "defaultName"],
-        ["*", "namespace"]
-      ]
-    }
-  ]
+  "imports": {
+    "package-name": [
+      "namedExport",
+      ["exportName", "alias"],
+      ["default", "defaultName"],
+      ["*", "namespace"]
+    ]
+  }
 }
 ```
 
@@ -287,17 +300,11 @@ A simplified syntax for defining imports. Each key is a package name, and the va
 
 ```json
 {
-  "imports": [
-    {
-      "@vueuse/core": ["useMouse", ["useFetch", "useMyFetch"]]
-    },
-    {
-      "axios": [["default", "axios"]]
-    },
-    {
-      "lodash": [["*", "_"]]
-    }
-  ]
+  "imports": {
+    "@vueuse/core": ["useMouse", ["useFetch", "useMyFetch"]],
+    "axios": [["default", "axios"]],
+    "lodash": [["*", "_"]]
+  }
 }
 ```
 
@@ -316,23 +323,57 @@ import * as _ from 'lodash'
 - **Default import**: `["default", "axios"]` → `import axios from 'axios'`
 - **Namespace import**: `["*", "_"]` → `import * as _ from 'lodash'`
 
-> **Note**: The Mapping format is a simplified syntax. It's equivalent to the Explicit format but groups imports by package for cleaner configuration.
->
-> ```json
-> // Mapping format (concise)
-> {
->   "axios": [["default", "axios"]],
->   "lodash": [["*", "_"]]
-> }
->
-> // Explicit format (verbose, same result)
-> [
->   { "name": "default", "as": "axios", "from": "axios" },
->   { "name": "*", "as": "_", "from": "lodash" }
-> ]
-> ```
+#### 3. InlinePreset - Inline Import Configuration
 
-#### 3. Explicit Import Array
+An object with `from` field specifying the module and `imports` array:
+
+```json
+{
+  "imports": {
+    "from": "react",
+    "imports": ["useState", "useEffect", ["useMemo", "useMemoized"]]
+  }
+}
+```
+
+**Generated imports:**
+
+```js
+import { useEffect, useMemo as useMemoized, useState } from 'react'
+```
+
+The `imports` array can contain:
+
+- **String**: `"useState"` - simple named import
+- **Tuple**: `["useMemo", "useMemoized"]` - named import with alias
+- **Object**: `{ "name": "useEffect", "as": "useReactEffect" }` - named import with optional alias
+- **Nested InlinePreset**: Another InlinePreset object for grouping
+
+**Example with nested presets:**
+
+```json
+{
+  "imports": {
+    "from": "react",
+    "imports": [
+      "useState",
+      {
+        "from": "react-dom",
+        "imports": ["createPortal", "flushSync"]
+      }
+    ]
+  }
+}
+```
+
+**Generated imports:**
+
+```js
+import { useState } from 'react'
+import { createPortal, flushSync } from 'react-dom'
+```
+
+#### 4. Explicit Import Array (Legacy)
 
 An array of import items where each item specifies the `name`, optional `as` (alias), and `from` (package) fields:
 
@@ -367,7 +408,7 @@ import { ref } from 'vue'
 
 #### Mixed Format
 
-You can combine all three formats:
+You can combine all formats in an array:
 
 ```json
 {
@@ -377,10 +418,11 @@ You can combine all three formats:
     {
       "@vueuse/core": ["useMouse", "useFetch"]
     },
-    [
-      { "name": "default", "as": "axios", "from": "axios" },
-      { "name": "computed", "from": "vue" }
-    ]
+    {
+      "from": "axios",
+      "imports": [["default", "axios"]]
+    },
+    [{ "name": "computed", "from": "vue" }]
   ]
 }
 ```

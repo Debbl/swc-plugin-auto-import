@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
             },
           ],
           // Set to true to enable debug logging
-          debug: true,
+          debug: false,
         },
       ],
     ],

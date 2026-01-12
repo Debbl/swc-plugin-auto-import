@@ -10,7 +10,10 @@ mod config;
 mod presets;
 mod visitor;
 
-pub use config::{ExplicitImport, ImportConfig, ImportItem, ImportSource, PluginConfig};
+pub use config::{
+    Arrayable, ExplicitImport, ImportConfig, ImportItem, ImportSource, InlinePreset, PluginConfig,
+    PresetImport,
+};
 pub use visitor::AutoImportVisitor;
 
 /// Convert Program AST to source code string for debugging

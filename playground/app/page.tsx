@@ -9,7 +9,8 @@ export default function Home() {
   }, [count]);
 
   return (
-    <div className={cn('"flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black"')}>
+    // eslint-disable-next-line react/jsx-no-undef
+    <motion.div className={cn('"flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black"')}>
       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
         <Image
           className="dark:invert"
@@ -67,6 +68,6 @@ export default function Home() {
           </a>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 }

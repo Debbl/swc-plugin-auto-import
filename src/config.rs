@@ -34,33 +34,98 @@ pub struct ExplicitImport {
     pub from: String,
 }
 
+/// PresetImport - supports multiple formats for inline preset imports
+///
+/// Corresponds to: Omit<Import, 'from'> | ImportName | [name: ImportName, as?: ImportName, from?: ModuleId]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum PresetImport {
+    /// Simple string: "useState"
+    Simple(String),
+    /// Tuple form: ["useState", "useSignal"] or ["useState", "useSignal", "react"]
+    Tuple(Vec<String>),
+    /// Object form: { name: "useState", as?: "useSignal" }
+    Object {
+        name: String,
+        #[serde(rename = "as")]
+        #[serde(skip_serializing_if = "Option::is_none")]
+        alias: Option<String>,
+    },
+    /// Nested inline preset
+    Nested(Box<InlinePreset>),
+}
+
+/// InlinePreset - defines imports from a single module
+///
+/// Corresponds to: { from: ModuleId, type?: boolean, imports: (PresetImport | InlinePreset)[] }
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InlinePreset {
+    /// Module specifier to import from
+    pub from: String,
+    /// If this import is a pure type import
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "type")]
+    pub type_only: Option<bool>,
+    /// List of imports from this module
+    pub imports: Vec<PresetImport>,
+}
+
 /// Import configuration item - supports multiple formats
+///
+/// Corresponds to: ImportsMap | PresetName | InlinePreset
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum ImportConfig {
-    /// Simple string form: "react"
-    Simple(String),
-    /// Explicit form with individual import items, each with their own from field
+    /// InlinePreset: { from: "react", imports: ["useState", "useEffect"] }
+    /// Must be checked first due to the 'from' field being the distinguishing factor
+    InlinePreset(InlinePreset),
+
+    /// Explicit form with individual import items (legacy support)
     /// Example: [{ name: "ref", from: "vue" }, { name: "useState", as: "useSignal", from: "react" }]
     Explicit(Vec<ExplicitImport>),
-    /// Object mapping form - simplified syntax for package imports
+
+    /// ImportsMap: Object mapping form - simplified syntax for package imports
     ///
     /// Supports:
     /// - Named imports: { "@vueuse/core": ["useMouse"] } -> import { useMouse } from '@vueuse/core'
     /// - Aliased imports: { "@vueuse/core": [["useFetch", "useMyFetch"]] } -> import { useFetch as useMyFetch } from '@vueuse/core'
     /// - Default imports: { "axios": [["default", "axios"]] } -> import axios from 'axios'
     /// - Namespace imports: { "lodash": [["*", "_"]] } -> import * as _ from 'lodash'
-    Mapping(HashMap<String, ImportSource>),
+    ImportsMap(HashMap<String, ImportSource>),
+
+    /// PresetName: Simple string form like "react", "vue", "react-dom"
+    PresetName(String),
+}
+
+/// Arrayable type - supports both single value and array
+///
+/// Corresponds to: type Arrayable<T> = T | Array<T>
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Arrayable<T> {
+    Single(T),
+    Array(Vec<T>),
 }
 
 /// Plugin configuration
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PluginConfig {
-    /// Import configurations: can be strings, objects with 'from' field, or package mappings
+    /// Import configurations: can be a single item or array of ImportsMap | PresetName | InlinePreset
+    ///
+    /// Corresponds to: imports?: Arrayable<ImportsMap | PresetName | InlinePreset>
     #[serde(default)]
-    pub imports: Vec<ImportConfig>,
+    pub imports: Option<Arrayable<ImportConfig>>,
 
     /// Enable debug logging
     #[serde(default)]
     pub debug: bool,
+}
+
+impl Default for PluginConfig {
+    fn default() -> Self {
+        Self {
+            imports: None,
+            debug: false,
+        }
+    }
 }

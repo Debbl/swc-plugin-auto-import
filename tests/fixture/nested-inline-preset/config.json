@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "from": "react",
+    "imports": [
+      "useState",
+      {
+        "from": "react-dom",
+        "imports": ["createPortal", "flushSync"]
+      }
+    ]
+  }
+}

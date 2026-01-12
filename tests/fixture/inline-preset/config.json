@@ -1,0 +1,10 @@
+{
+  "imports": {
+    "from": "react",
+    "imports": [
+      "useState",
+      { "name": "useEffect", "as": "useReactEffect" },
+      ["useMemo", "useMemoized"]
+    ]
+  }
+}
