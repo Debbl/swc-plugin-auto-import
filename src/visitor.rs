@@ -168,64 +168,96 @@ impl AutoImportVisitor {
 
         // Debug: print collected identifiers (only if debug is enabled)
         if self.debug {
-            eprintln!(
-                "[DEBUG] Used identifiers count: {}",
-                collector.used_identifiers.len()
-            );
-            eprintln!(
-                "[DEBUG] Used identifiers (sample): {:?}",
+            // Collect all debug info in a single string to avoid interleaved output
+            let debug_info = format!(
+                "[DEBUG] Used identifiers count: {}\n\
+                 [DEBUG] Used identifiers (sample): {:?}\n\
+                 [DEBUG] Imported identifiers count: {}\n\
+                 [DEBUG] Imported identifiers (sample): {:?}\n\
+                 [DEBUG] Declared identifiers count: {}\n\
+                 [DEBUG] Declared identifiers (sample): {:?}",
+                collector.used_identifiers.len(),
                 collector
                     .used_identifiers
                     .iter()
                     .take(10)
-                    .collect::<Vec<_>>()
-            );
-
-            eprintln!(
-                "[DEBUG] Imported identifiers count: {}",
-                collector.imported_identifiers.len()
-            );
-            eprintln!(
-                "[DEBUG] Imported identifiers (sample): {:?}",
+                    .collect::<Vec<_>>(),
+                collector.imported_identifiers.len(),
                 collector
                     .imported_identifiers
                     .iter()
                     .take(10)
-                    .collect::<Vec<_>>()
-            );
-
-            eprintln!(
-                "[DEBUG] Declared identifiers count: {}",
-                collector.declared_identifiers.len()
-            );
-            eprintln!(
-                "[DEBUG] Declared identifiers (sample): {:?}",
+                    .collect::<Vec<_>>(),
+                collector.declared_identifiers.len(),
                 collector
                     .declared_identifiers
                     .iter()
                     .take(10)
                     .collect::<Vec<_>>()
             );
+            // Output as a single atomic write to avoid interleaving
+            eprintln!("{}", debug_info);
         }
 
         // Find identifiers that need to be auto-imported
         let mut imports_to_add: HashMap<String, Vec<(String, Option<String>)>> = HashMap::new();
+        let mut skipped_already_imported = Vec::new();
+        let mut skipped_already_declared = Vec::new();
 
         for (source, available_imports) in &self.import_map {
             for (name, alias) in available_imports {
                 let local_name = alias.as_ref().unwrap_or(name);
 
                 // If identifier is used but not imported or declared, add import
-                if collector.used_identifiers.contains(local_name)
-                    && !collector.imported_identifiers.contains(local_name)
-                    && !collector.declared_identifiers.contains(local_name)
-                {
-                    imports_to_add
-                        .entry(source.clone())
-                        .or_insert_with(Vec::new)
-                        .push((name.clone(), alias.clone()));
+                if collector.used_identifiers.contains(local_name) {
+                    if collector.imported_identifiers.contains(local_name) {
+                        skipped_already_imported.push((local_name.clone(), source.clone()));
+                    } else if collector.declared_identifiers.contains(local_name) {
+                        skipped_already_declared.push((local_name.clone(), source.clone()));
+                    } else {
+                        imports_to_add
+                            .entry(source.clone())
+                            .or_insert_with(Vec::new)
+                            .push((name.clone(), alias.clone()));
+                    }
                 }
             }
+        }
+
+        // Debug: print auto-import decisions
+        if self.debug {
+            let mut auto_import_info = String::new();
+
+            if !imports_to_add.is_empty() {
+                auto_import_info.push_str("\n[AUTO-IMPORT] Will add these imports:\n");
+                let mut sorted_imports: Vec<_> = imports_to_add.iter().collect();
+                sorted_imports.sort_by(|a, b| a.0.cmp(b.0));
+                for (source, imports) in sorted_imports {
+                    auto_import_info.push_str(&format!("  from '{}': {:?}\n", source, imports));
+                }
+            } else {
+                auto_import_info.push_str("\n[AUTO-IMPORT] No imports to add\n");
+            }
+
+            if !skipped_already_imported.is_empty() {
+                auto_import_info.push_str("\n[SKIPPED] Already imported in current file:\n");
+                skipped_already_imported.sort();
+                for (name, source) in &skipped_already_imported {
+                    auto_import_info
+                        .push_str(&format!("  '{}' (would be from '{}')\n", name, source));
+                }
+            }
+
+            if !skipped_already_declared.is_empty() {
+                auto_import_info.push_str("\n[SKIPPED] Declared in current file:\n");
+                skipped_already_declared.sort();
+                for (name, source) in &skipped_already_declared {
+                    auto_import_info
+                        .push_str(&format!("  '{}' (would be from '{}')\n", name, source));
+                }
+            }
+
+            eprintln!("{}", auto_import_info);
         }
 
         // Generate import statements with sorted order
