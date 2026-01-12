@@ -1,0 +1,20 @@
+{
+  "imports": [
+    {
+      "@vueuse/core": [
+        "useMouse",
+        ["useFetch", "useMyFetch"]
+      ]
+    },
+    {
+      "axios": [
+        ["default", "axios"]
+      ]
+    },
+    {
+      "lodash": [
+        ["*", "_"]
+      ]
+    }
+  ]
+}

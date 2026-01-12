@@ -105,6 +105,17 @@ module.exports = {
 }
 ```
 
+## 📋 Import Types Summary
+
+The plugin supports four types of imports:
+
+| Import Type          | Mapping Format               | Explicit Format                                                      | Generated Code                                          |
+| -------------------- | ---------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------- |
+| **Named**            | `"ref"`                      | `{ "name": "ref", "from": "vue" }`                                   | `import { ref } from 'vue'`                             |
+| **Named with Alias** | `["useFetch", "useMyFetch"]` | `{ "name": "useFetch", "as": "useMyFetch", "from": "@vueuse/core" }` | `import { useFetch as useMyFetch } from '@vueuse/core'` |
+| **Default**          | `["default", "axios"]`       | `{ "name": "default", "as": "axios", "from": "axios" }`              | `import axios from 'axios'`                             |
+| **Namespace**        | `["*", "_"]`                 | `{ "name": "*", "as": "_", "from": "lodash" }`                       | `import * as _ from 'lodash'`                           |
+
 ## 📖 Usage Examples
 
 ### Vue 3 Auto Import
@@ -175,7 +186,7 @@ useEffect(() => {
 
 ### Custom Library Import
 
-**Configuration:**
+**Configuration (using package mapping):**
 
 ```json
 {
@@ -185,11 +196,23 @@ useEffect(() => {
     },
     {
       "lodash-es": ["debounce", "throttle"]
-    },
-    {
-      "from": "axios",
-      "imports": [["default", "axios"]]
     }
+  ]
+}
+```
+
+**Configuration (using explicit import array):**
+
+```json
+{
+  "imports": [
+    [
+      { "name": "useMouse", "from": "@vueuse/core" },
+      { "name": "useKeyboard", "from": "@vueuse/core" },
+      { "name": "debounce", "from": "lodash-es" },
+      { "name": "throttle", "from": "lodash-es" },
+      { "name": "default", "as": "axios", "from": "axios" }
+    ]
   ]
 }
 ```
@@ -207,8 +230,8 @@ axios.get('/api/data')
 
 ```js
 import { useMouse } from '@vueuse/core'
+import axios from 'axios'
 import { debounce } from 'lodash-es'
-import { default as axios } from 'axios'
 
 const { x, y } = useMouse()
 const debouncedFn = debounce(() => {}, 300)
@@ -243,11 +266,18 @@ Currently supported presets:
 
 #### 2. Package Mapping Object
 
+A simplified syntax for defining imports. Each key is a package name, and the value is an array of imports.
+
 ```json
 {
   "imports": [
     {
-      "package-name": ["namedExport1", "namedExport2"]
+      "package-name": [
+        "namedExport",
+        ["exportName", "alias"],
+        ["default", "defaultName"],
+        ["*", "namespace"]
+      ]
     }
   ]
 }
@@ -259,44 +289,81 @@ Currently supported presets:
 {
   "imports": [
     {
-      "@vueuse/core": ["useMouse", "useFetch"]
+      "@vueuse/core": ["useMouse", ["useFetch", "useMyFetch"]]
     },
     {
-      "date-fns": ["format", "parseISO"]
+      "axios": [["default", "axios"]]
+    },
+    {
+      "lodash": [["*", "_"]]
     }
   ]
 }
 ```
 
-#### 3. Explicit Import Object
+**Generated imports:**
+
+```js
+import { useFetch as useMyFetch, useMouse } from '@vueuse/core'
+import axios from 'axios'
+import * as _ from 'lodash'
+```
+
+**Format explanation:**
+
+- **Named import**: `"useMouse"` → `import { useMouse } from '@vueuse/core'`
+- **Named import with alias**: `["useFetch", "useMyFetch"]` → `import { useFetch as useMyFetch } from '@vueuse/core'`
+- **Default import**: `["default", "axios"]` → `import axios from 'axios'`
+- **Namespace import**: `["*", "_"]` → `import * as _ from 'lodash'`
+
+> **Note**: The Mapping format is a simplified syntax. It's equivalent to the Explicit format but groups imports by package for cleaner configuration.
+>
+> ```json
+> // Mapping format (concise)
+> {
+>   "axios": [["default", "axios"]],
+>   "lodash": [["*", "_"]]
+> }
+>
+> // Explicit format (verbose, same result)
+> [
+>   { "name": "default", "as": "axios", "from": "axios" },
+>   { "name": "*", "as": "_", "from": "lodash" }
+> ]
+> ```
+
+#### 3. Explicit Import Array
+
+An array of import items where each item specifies the `name`, optional `as` (alias), and `from` (package) fields:
 
 ```json
 {
   "imports": [
-    {
-      "from": "package-name",
-      "imports": ["export1", ["exportName", "alias"]]
-    }
+    [
+      { "name": "ref", "from": "vue" },
+      { "name": "useState", "as": "useSignal", "from": "react" },
+      { "name": "default", "as": "_", "from": "lodash" },
+      { "name": "*", "as": "lodash", "from": "lodash-es" }
+    ]
   ]
 }
 ```
 
-**Example:**
+**Generated imports:**
 
-```json
-{
-  "imports": [
-    {
-      "from": "axios",
-      "imports": [["default", "axios"]]
-    },
-    {
-      "from": "motion/react-m",
-      "imports": [["*", "motion"]]
-    }
-  ]
-}
+```js
+import _ from 'lodash'
+import * as lodash from 'lodash-es'
+import { useState as useSignal } from 'react'
+import { ref } from 'vue'
 ```
+
+**Format explanation:**
+
+- **Named import**: `{ "name": "ref", "from": "vue" }` → `import { ref } from 'vue'`
+- **Named import with alias**: `{ "name": "useState", "as": "useSignal", "from": "react" }` → `import { useState as useSignal } from 'react'`
+- **Default import**: `{ "name": "default", "as": "_", "from": "lodash" }` → `import _ from 'lodash'`
+- **Namespace import**: `{ "name": "*", "as": "lodash", "from": "lodash-es" }` → `import * as lodash from 'lodash-es'`
 
 #### Mixed Format
 
@@ -310,10 +377,10 @@ You can combine all three formats:
     {
       "@vueuse/core": ["useMouse", "useFetch"]
     },
-    {
-      "from": "axios",
-      "imports": [["default", "axios"]]
-    }
+    [
+      { "name": "default", "as": "axios", "from": "axios" },
+      { "name": "computed", "from": "vue" }
+    ]
   ]
 }
 ```

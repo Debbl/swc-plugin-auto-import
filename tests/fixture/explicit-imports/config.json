@@ -1,0 +1,11 @@
+{
+  "imports": [
+    [
+      { "name": "ref", "from": "vue" },
+      { "name": "computed", "from": "vue" },
+      { "name": "useState", "as": "useSignal", "from": "react" },
+      { "name": "default", "as": "_", "from": "lodash" },
+      { "name": "*", "as": "motion", "from": "framer-motion" }
+    ]
+  ]
+}

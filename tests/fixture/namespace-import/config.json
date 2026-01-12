@@ -1,0 +1,8 @@
+{
+  "imports": [
+    [
+      { "name": "*", "as": "_", "from": "lodash" },
+      { "name": "*", "as": "motion", "from": "framer-motion" }
+    ]
+  ]
+}

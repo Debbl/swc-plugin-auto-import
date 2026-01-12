@@ -37,27 +37,14 @@ impl AutoImportVisitor {
                             .extend(imports);
                     }
                 }
-                // Explicit form: { from: "...", imports: [...] }
-                ImportConfig::Explicit { from, imports } => {
-                    let import_list: Vec<(String, Option<String>)> = match imports {
-                        ImportSource::Simple(names) => {
-                            names.iter().map(|name| (name.clone(), None)).collect()
-                        }
-                        ImportSource::WithAlias(items) => items
-                            .iter()
-                            .map(|item| match item {
-                                ImportItem::Simple(name) => (name.clone(), None),
-                                ImportItem::Aliased([name, alias]) => {
-                                    (name.clone(), Some(alias.clone()))
-                                }
-                            })
-                            .collect(),
-                    };
-
-                    import_map
-                        .entry(from.clone())
-                        .or_insert_with(Vec::new)
-                        .extend(import_list);
+                // Explicit form: [{ name: "ref", from: "vue" }, { name: "useState", as: "useSignal", from: "react" }]
+                ImportConfig::Explicit(items) => {
+                    for item in items {
+                        import_map
+                            .entry(item.from.clone())
+                            .or_insert_with(Vec::new)
+                            .push((item.name.clone(), item.alias.clone()));
+                    }
                 }
                 // Object mapping form: { "package": ["export1", "export2"] }
                 ImportConfig::Mapping(map) => {
@@ -178,6 +165,26 @@ impl AutoImportVisitor {
             let specifiers = imports
                 .into_iter()
                 .map(|(name, alias)| {
+                    // Handle default imports: { name: "default", as: "_", from: "lodash" }
+                    if name == "default" {
+                        // Default import: import alias_name from "source"
+                        let local_name = alias.unwrap_or_else(|| "default".to_string());
+                        return ImportSpecifier::Default(ImportDefaultSpecifier {
+                            span: DUMMY_SP,
+                            local: Ident::new(local_name.into(), DUMMY_SP, unresolved_ctxt),
+                        });
+                    }
+
+                    // Handle namespace imports: { name: "*", as: "_", from: "lodash" }
+                    if name == "*" {
+                        // Namespace import: import * as alias_name from "source"
+                        let local_name = alias.unwrap_or_else(|| "default".to_string());
+                        return ImportSpecifier::Namespace(ImportStarAsSpecifier {
+                            span: DUMMY_SP,
+                            local: Ident::new(local_name.into(), DUMMY_SP, unresolved_ctxt),
+                        });
+                    }
+
                     match alias {
                         Some(alias_name) => {
                             // Import with alias: import { name as alias_name } from "source"

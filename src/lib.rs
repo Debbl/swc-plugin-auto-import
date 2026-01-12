@@ -10,7 +10,7 @@ mod config;
 mod presets;
 mod visitor;
 
-pub use config::{ImportConfig, ImportItem, ImportSource, PluginConfig};
+pub use config::{ExplicitImport, ImportConfig, ImportItem, ImportSource, PluginConfig};
 pub use visitor::AutoImportVisitor;
 
 /// Convert Program AST to source code string for debugging
@@ -43,12 +43,16 @@ fn program_to_string(program: &Program) -> String {
 ///             "react",
 ///             "react-dom",
 ///             {
-///               "@vueuse/core": ["useMouse", "useFetch"]
+///               "@vueuse/core": ["useMouse", ["useFetch", "useMyFetch"]],
+///               "axios": [["default", "axios"]],
+///               "lodash": [["*", "_"]]
 ///             },
-///             {
-///               "from": "axios",
-///               "imports": [["default", "axios"]]
-///             }
+///             [
+///               { "name": "ref", "from": "vue" },
+///               { "name": "useState", "as": "useSignal", "from": "react" },
+///               { "name": "default", "as": "axios", "from": "axios" },
+///               { "name": "*", "as": "motion", "from": "motion/react-m" }
+///             ]
 ///           ]
 ///         }]
 ///       ]
