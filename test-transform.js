@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
-const path = require('node:path')
-const swc = require('@swc/core')
+import path from 'node:path'
+import swc from '@swc/core'
+
+const __dirname = path.dirname(new URL(import.meta.url).pathname)
 
 swc
   .transform('useState(0)', {
