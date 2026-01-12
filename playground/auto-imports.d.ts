@@ -11,4 +11,5 @@ declare global {
   const useState: typeof import('react').useState
   const cn: typeof import('twl').cn
   const add: typeof import('@/utils').add
+  const motion: typeof import('motion/react-m')
 }
