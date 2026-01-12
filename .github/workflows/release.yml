@@ -1,6 +1,7 @@
 name: Release
 
 permissions:
+  id-token: write # Required for OIDC
   contents: write
 
 on:
@@ -62,6 +63,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
 
-      - run: npx changelogithub
+      - name: Publish to npm
+        run: pnpm publish
+
+      - name: Generate changelog
+        run: npx changelogithub
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
