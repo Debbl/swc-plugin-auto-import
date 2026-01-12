@@ -6,31 +6,6 @@ pub fn get_preset_imports(preset: &str) -> HashMap<String, Vec<(String, Option<S
     let mut map = HashMap::new();
 
     match preset {
-        "vue" => {
-            map.insert(
-                "vue".to_string(),
-                vec![
-                    ("ref".to_string(), None),
-                    ("computed".to_string(), None),
-                    ("reactive".to_string(), None),
-                    ("watch".to_string(), None),
-                    ("watchEffect".to_string(), None),
-                    ("onMounted".to_string(), None),
-                    ("onUnmounted".to_string(), None),
-                    ("onBeforeMount".to_string(), None),
-                    ("onBeforeUnmount".to_string(), None),
-                    ("onUpdated".to_string(), None),
-                    ("onBeforeUpdate".to_string(), None),
-                    ("nextTick".to_string(), None),
-                    ("defineComponent".to_string(), None),
-                    ("createApp".to_string(), None),
-                    ("toRef".to_string(), None),
-                    ("toRefs".to_string(), None),
-                    ("unref".to_string(), None),
-                    ("isRef".to_string(), None),
-                ],
-            );
-        }
         "react" => {
             map.insert(
                 "react".to_string(),
@@ -83,26 +58,6 @@ pub fn get_preset_imports(preset: &str) -> HashMap<String, Vec<(String, Option<S
                     ("preinitModule".to_string(), None),
                     ("preload".to_string(), None),
                     ("preloadModule".to_string(), None),
-                ],
-            );
-        }
-        "vue-router" => {
-            map.insert(
-                "vue-router".to_string(),
-                vec![
-                    ("useRouter".to_string(), None),
-                    ("useRoute".to_string(), None),
-                ],
-            );
-        }
-        "react-router" => {
-            map.insert(
-                "react-router-dom".to_string(),
-                vec![
-                    ("useNavigate".to_string(), None),
-                    ("useLocation".to_string(), None),
-                    ("useParams".to_string(), None),
-                    ("useSearchParams".to_string(), None),
                 ],
             );
         }
