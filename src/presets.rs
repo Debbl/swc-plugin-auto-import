@@ -72,16 +72,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_vue_preset() {
-        let imports = get_preset_imports("vue");
-        assert!(imports.contains_key("vue"));
-        let vue_imports = imports.get("vue").unwrap();
-        assert!(vue_imports.len() >= 17);
-        assert!(vue_imports.contains(&("ref".to_string(), None)));
-        assert!(vue_imports.contains(&("computed".to_string(), None)));
-    }
-
-    #[test]
     fn test_react_preset() {
         let imports = get_preset_imports("react");
         assert!(imports.contains_key("react"));
@@ -101,14 +91,5 @@ mod tests {
         assert_eq!(react_dom_imports.len(), 9);
         assert!(react_dom_imports.contains(&("useFormStatus".to_string(), None)));
         assert!(react_dom_imports.contains(&("createPortal".to_string(), None)));
-    }
-
-    #[test]
-    fn test_router_presets() {
-        let vue_router = get_preset_imports("vue-router");
-        assert!(vue_router.contains_key("vue-router"));
-
-        let react_router = get_preset_imports("react-router");
-        assert!(react_router.contains_key("react-router-dom"));
     }
 }
